@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  backend:
+    build: ./backend
+    container_name: kanban-backend
+    environment:
+      - PORT=3001
+      - JWT_SECRET=${JWT_SECRET:-devsecret}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:5173,http://localhost:8080}
+      - N8N_STATUS_WEBHOOK=${N8N_STATUS_WEBHOOK:-}
+      - N8N_FINALIZE_WEBHOOK=${N8N_FINALIZE_WEBHOOK:-}
+    volumes:
+      - ./backend/data:/app/data
+    ports:
+      - "3001:3001"
+
+  frontend:
+    build: ./frontend
+    container_name: kanban-frontend
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:3001}
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
