@@ -33,38 +33,58 @@ export default function KanbanBoard({ orders, setOrders }) {
   }
 
   return (
-    <div>
-      <header style={{ padding:12, background:'#111827', color:'white' }}>
-        <strong>Tablero de Pedidos</strong>
-      </header>
-      <div className="container" style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:16, padding:16 }}>
-        <DragDropContext onDragEnd={onDragEnd}>
-          {columns.map(col => (
-            <Droppable droppableId={col.id} key={col.id}>
-              {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps} style={{ background:'#fff', border:'1px solid #e5e7eb', borderRadius:8, minHeight:400, padding:12 }}>
-                  <h3 style={{ marginTop:0 }}>{col.title}</h3>
-                  {(grouped[col.id] || []).map((o, idx) => (
-                    <Draggable draggableId={o.id} index={idx} key={o.id}>
-                      {(provided2) => (
-                        <div ref={provided2.innerRef} {...provided2.draggableProps} {...provided2.dragHandleProps}
-                          style={{ userSelect:'none', padding:12, marginBottom:8, border:'1px solid #e5e7eb', borderRadius:8, background: o.color || '#f9fafb', ...provided2.draggableProps.style }}>
-                          <div style={{ display:'flex', justifyContent:'space-between' }}>
-                            <strong>{o.title}</strong>
-                            <small>{new Date(o.createdAt).toLocaleTimeString()}</small>
-                          </div>
-                          {o.details && <div style={{ color:'#4b5563', marginTop:6 }}>{o.details}</div>}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          ))}
-        </DragDropContext>
-      </div>
+<div
+  ref={provided2.innerRef}
+  {...provided2.draggableProps}
+  {...provided2.dragHandleProps}
+  style={{
+    userSelect: 'none',
+    padding: 12,
+    marginBottom: 8,
+    border: '1px solid #e5e7eb',
+    borderRadius: 8,
+    background: o.color || '#f9fafb',
+    ...provided2.draggableProps.style
+  }}
+>
+  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+    <strong>{o.title}</strong>
+    <small>{new Date(o.createdAt).toLocaleTimeString()}</small>
+  </div>
+
+  {/* Cliente */}
+  {o.cliente && (
+    <div style={{ marginTop: 6 }}>
+      <strong>Cliente:</strong> {o.cliente}
     </div>
+  )}
+
+  {/* Monto */}
+  {o.monto !== undefined && (
+    <div style={{ marginTop: 4 }}>
+      <strong>Monto:</strong> ${o.monto}
+    </div>
+  )}
+
+  {/* Productos */}
+  {o.productos && o.productos.length > 0 && (
+    <div style={{ marginTop: 6 }}>
+      <strong>Productos:</strong>
+      <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
+        {o.productos.map((p, i) => (
+          <li key={i}>
+            {p.nombre} x {p.cantidad}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+
+  {/* Detalles originales */}
+  {o.details && (
+    <div style={{ color: '#4b5563', marginTop: 6 }}>{o.details}</div>
+  )}
+</div>
+
   );
 }

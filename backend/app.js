@@ -106,38 +106,55 @@ app.post('/api/orders/:id/status', auth, async (req, res) => {
 
 // --- Webhooks from n8n ---
 // 1) New incoming order
+// 1) New incoming order
 app.post('/webhook/order', (req, res) => {
-  const { id, title, details, color } = req.body || {};
+  const { id, title, details, color, cliente, monto, productos } = req.body || {};
+
   const order = {
     id: id || uuidv4(),
     title: title || 'Pedido',
     details: details || '',
+    cliente: cliente || 'Cliente sin nombre',
+    monto: monto || 0,
+    productos: productos || [], // array [{ nombre, cantidad, precio }]
     status: 'incoming',
     color: color || null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
+
   const db = readDB();
   db.orders.unshift(order);
   writeDB(db);
+
   broadcast('order_created', order);
   res.json({ ok: true, order });
 });
 
+
 // 2) Update existing order (e.g., change color or other flags)
+// 2) Update existing order
 app.post('/webhook/order-update', (req, res) => {
-  const { id, color, details, title } = req.body || {};
+  const { id, color, details, title, cliente, monto, productos } = req.body || {};
   const db = readDB();
   const order = db.orders.find(o => o.id === id);
+
   if (!order) return res.status(404).json({ error: 'Order not found' });
+
   if (color !== undefined) order.color = color;
   if (details !== undefined) order.details = details;
   if (title !== undefined) order.title = title;
+  if (cliente !== undefined) order.cliente = cliente;
+  if (monto !== undefined) order.monto = monto;
+  if (productos !== undefined) order.productos = productos;
+
   order.updatedAt = new Date().toISOString();
   writeDB(db);
-  broadcast('order_updated', { id: order.id, color: order.color, details: order.details, title: order.title });
+
+  broadcast('order_updated', order);
   res.json({ ok: true, order });
 });
+
 
 server.listen(PORT, () => {
   console.log(`Backend listening on http://0.0.0.0:${PORT}`);
